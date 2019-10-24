@@ -36,8 +36,7 @@ public class EventControllerTests {
 
     @Test
     public void createEvent() throws Exception {
-        Event event = Event.builder()
-                .id(100)
+        EventDto eventDto = EventDto.builder()
                 .name("name")
                 .description("desc")
                 .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 12, 14,22))
@@ -53,9 +52,9 @@ public class EventControllerTests {
 //        Mockito.when(eventRepository.save(event)).thenReturn(event);
 
         mockMvc.perform(post("/api/events")
-                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(event)))
+                    .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("id").exists())
@@ -65,6 +64,36 @@ public class EventControllerTests {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(jsonPath("id").value(Matchers.not(100)));
 //                .andExpect(jsonPath("free").value(Matchers.not(true)));
+
+    }
+
+
+    @Test
+    public void createEvent_BadRequest() throws Exception {
+        Event event = Event.builder()
+                .id(100)
+                .name("name")
+                .description("desc")
+                .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 12, 14,22))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 13, 14,22))
+                .beginEventDateTime(LocalDateTime.of(2018, 11, 20, 14,22))
+                .endEventDateTime(LocalDateTime.of(2018, 11, 21, 14,22))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("강남")
+                .build();
+
+
+        mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(event)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        // application.properties
+        // spring.jackson.deserialization.fail-on-unknown-properties=true
 
     }
 
