@@ -1,7 +1,9 @@
 package me.jake.restapi.events;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.jake.restapi.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +37,7 @@ public class EventControllerTests {
     ObjectMapper objectMapper;
 
     @Test
+    @TestDescription("정상적으로 실행되어야 한다.")
     public void createEvent() throws Exception {
         EventDto eventDto = EventDto.builder()
                 .name("name")
@@ -69,6 +72,7 @@ public class EventControllerTests {
 
 
     @Test
+    @TestDescription("bad request.")
     public void createEvent_BadRequest() throws Exception {
         Event event = Event.builder()
                 .id(100)
@@ -95,6 +99,41 @@ public class EventControllerTests {
         // application.properties
         // spring.jackson.deserialization.fail-on-unknown-properties=true
 
+    }
+
+    @Test
+    @TestDescription("입력값이 비어있는 경우에 에러가 나는 케이스")
+    public void create_Bad_Request_Empty_Input() throws Exception {
+        EventDto eventDto = EventDto.builder().build();
+
+        this.mockMvc.perform(post("/api/events")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(eventDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    @TestDescription("입력값이 잘못되어 있는 경우에 에러가 나는 케이스")
+    public void create_Bad_Request_Wrong_Input() throws Exception {
+        EventDto eventDto = EventDto.builder()
+                .name("name")
+                .description("desc")
+                .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 12, 14,22))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018, 11, 13, 14,22))
+                .beginEventDateTime(LocalDateTime.of(2018, 11, 20, 14,22))
+                .endEventDateTime(LocalDateTime.of(2018, 10, 21, 14,22))  //wrong
+                .basePrice(10000)  //wrong
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("강남")
+                .build();
+
+        this.mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
 }
