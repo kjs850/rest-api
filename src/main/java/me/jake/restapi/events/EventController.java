@@ -31,18 +31,19 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors){  //받지 않아야 하는거 받을수 있으니.. dto사용
+    public ResponseEntity<Object> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors){  //받지 않아야 하는거 받을수 있으니.. dto사용
         if (errors.hasErrors()){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
 
         eventValidator.validate(eventDto, errors);
 
         if (errors.hasErrors()){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
 
         Event event = modelMapper.map(eventDto, Event.class);
+        event.update();
         Event newEvent = this.eventRepository.save(event);
         URI createdUri = linkTo((EventController.class)).slash(newEvent.getId()).toUri();
         return ResponseEntity.created(createdUri).body(event);
