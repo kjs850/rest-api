@@ -2,6 +2,7 @@ package me.jake.restapi.events;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -45,7 +46,14 @@ public class EventController {
         Event event = modelMapper.map(eventDto, Event.class);
         event.update();
         Event newEvent = this.eventRepository.save(event);
-        URI createdUri = linkTo((EventController.class)).slash(newEvent.getId()).toUri();
-        return ResponseEntity.created(createdUri).body(event);
+        ControllerLinkBuilder selfLinKBuilder = linkTo((EventController.class)).slash(newEvent.getId());
+        URI createdUri = selfLinKBuilder.toUri();
+        EventResource eventResource = new EventResource(event);
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        eventResource.add(selfLinKBuilder.withSelfRel());
+        eventResource.add(selfLinKBuilder.withRel("update-event"));
+
+        return ResponseEntity.created(createdUri).body(eventResource);
+
     }
 }
