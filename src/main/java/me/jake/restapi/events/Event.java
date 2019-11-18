@@ -1,6 +1,7 @@
 package me.jake.restapi.events;
 
 import lombok.*;
+import me.jake.restapi.accounts.Account;
 import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
@@ -36,6 +37,8 @@ public class Event extends RepresentationModel<Event> {
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
 
+    @ManyToOne
+    private Account manager;
 
     public void update() {
         if(this.basePrice == 0 && this.maxPrice == 0){
