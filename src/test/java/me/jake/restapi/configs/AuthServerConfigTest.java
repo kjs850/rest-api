@@ -53,11 +53,11 @@ public class AuthServerConfigTest{
                 .roles(roleSet)
                 .build();
 
-        String clientid = "myApp";
+        String clientId = "myApp";
         String clientSecret = "pass";
 
         this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientid, clientSecret))
+                .with(httpBasic(clientId, clientSecret))
                 .param("username", username)
                 .param("password", password)
                 .param("grant_type", "password")
